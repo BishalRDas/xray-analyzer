@@ -146,9 +146,18 @@ def dashboard():
         if user:
             annotated_img = session.pop('annotated_img', None)
             detections = session.pop('detections', None)
-            return render_template('dashboard.html', user=user, annotated_img=annotated_img, detections=detections)
+            last_application_number = session.pop('last_application_number', None)  # ✅ Get from session
+
+            return render_template(
+                'dashboard.html',
+                user=user,
+                annotated_img=annotated_img,
+                detections=detections,
+                last_application_number=last_application_number  # ✅ Pass it
+            )
 
     return redirect(url_for('login'))
+
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -199,8 +208,10 @@ def analyze():
 
         session['annotated_img'] = result_img_path
         session['detections'] = detections
+        session['last_application_number'] = application_number  # ✅ ADD THIS
 
         return redirect(url_for('dashboard'))
+       
 
     flash('File type not allowed')
     return redirect(url_for('dashboard'))
@@ -229,14 +240,32 @@ def reports():
 
     return render_template('reports.html', reports=parsed_reports)
 
+
+@app.route('/test_email')
+def test_email():
+    try:
+        msg = Message(
+            subject="Test Email",
+            sender=app.config['MAIL_USERNAME'],
+            recipients=['your_other_email@gmail.com']
+        )
+        msg.body = "If you're reading this, Flask-Mail works!"
+        mail.send(msg)
+        return "✅ Test email sent successfully"
+    except Exception as e:
+        return f"❌ Email failed: {e}"
+
+
+
 @app.route('/send_report', methods=['POST'])
 def send_report():
     application_number = request.form.get('application_number')
     email = request.form.get('email')
+    redirect_origin = request.form.get('from', 'index')  # default to index
 
     if not application_number or not email:
         flash("Application number and email are required", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for(redirect_origin))
 
     conn = get_db_connection()
     report = conn.execute(
@@ -246,34 +275,38 @@ def send_report():
 
     if not report:
         flash("No report found for the provided application number.", "warning")
-        return redirect(url_for('index'))
+        return redirect(url_for(redirect_origin))
 
     image_path = report['image_path']
     detection_result = ast.literal_eval(report['detection_result']) if report['detection_result'] else []
 
-    # Check image validity using Pillow
     try:
         with Image.open(image_path) as img:
             img_format = img.format
     except Exception:
         flash("Image file is invalid or missing.", "danger")
-        return redirect(url_for('index'))
+        return redirect(url_for(redirect_origin))
 
-    # Build detection result string
-    if detection_result:
-        detection_text = "\n".join([f"{d['label']} — Confidence: {d['confidence']}%" for d in detection_result])
-    else:
-        detection_text = "No findings detected in the X-ray."
+    detection_text = (
+        "\n".join([f"{d['label']} — Confidence: {d['confidence']}%" for d in detection_result])
+        if detection_result else "No findings detected in the X-ray."
+    )
 
-    # Compose email
     msg = Message(
         subject="🦷 Your Dental X-ray Analysis Report",
         sender=app.config['MAIL_USERNAME'],
         recipients=[email]
     )
-    msg.body = f"Dear User,\n\nHere is your dental report for Application No: {application_number}.\n\nFindings:\n{detection_text}\n\nRegards,\nDibrugarh Dental College"
+    msg.body = f"""Dear User,
 
-    # Attach image
+Here is your dental report for Application No: {application_number}.
+
+Findings:
+{detection_text}
+
+Regards,
+Dibrugarh Dental College"""
+
     with open(image_path, 'rb') as img_file:
         msg.attach(
             filename=os.path.basename(image_path),
@@ -283,13 +316,13 @@ def send_report():
 
     try:
         mail.send(msg)
-        flash("Report has been sent to your email.", "success")
+        flash("Report has been sent to the patient's email address.", "success")
     except Exception as e:
         print("[ERROR] Email send failed:", e)
         flash("Failed to send email. Please try again later.", "danger")
 
-    
-    return redirect(url_for('index'))
+    return redirect(url_for(redirect_origin))
+
 
 
 @app.route('/logout')
