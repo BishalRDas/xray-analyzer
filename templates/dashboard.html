@@ -89,6 +89,14 @@
     <form action="{{ url_for('analyze') }}" method="POST" enctype="multipart/form-data">
       <div class="card-custom mb-5">
         <h4 class="mb-4">Upload Dental X-Ray Image</h4>
+
+        <!-- Patient Email -->
+        <div class="mb-3">
+          <label for="patient_email" class="form-label text-dark">Patient Email (optional)</label>
+          <input type="email" name="patient_email" id="patient_email" class="form-control" placeholder="Enter patient's email">
+        </div>
+
+        <!-- Image Upload -->
         <div class="upload-area mb-3" onclick="document.getElementById('file-input').click();">
           <input type="file" name="img" id="file-input" accept=".jpg,.jpeg,.png" style="display: none;" required onchange="previewImage(event)">
           <svg width="50" height="50" viewBox="0 0 24 24" fill="none">
@@ -101,6 +109,7 @@
           <p id="file-name" class="fw-bold"></p>
           <img id="preview-img" class="img-fluid mt-3" />
         </div>
+
         <button type="submit" class="btn btn-success w-100">Analyze X-Ray</button>
       </div>
     </form>

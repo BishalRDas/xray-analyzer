@@ -193,14 +193,17 @@ def analyze():
         timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         application_number = f"APP-{timestamp}-{session['user_id']}-{report_count}"
 
+        patient_email = request.form.get('patient_email')
+
         conn.execute("""
-            INSERT INTO reports (user_id, application_number, image_path, detection_result, created_at)
-            VALUES (?, ?, ?, ?, ?)
-        """, (
+            INSERT INTO reports (user_id, application_number, image_path, detection_result, patient_email, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """, (
             session['user_id'],
             application_number,
             result_img_path,
             str(detections),
+            patient_email,  # ✅ Save it
             datetime.datetime.now()
         ))
         conn.commit()
@@ -224,7 +227,10 @@ def reports():
 
     conn = get_db_connection()
     report_data = conn.execute(
-        "SELECT id, application_number, image_path, detection_result, created_at FROM reports WHERE user_id = ? ORDER BY created_at DESC",
+        """SELECT id, application_number, image_path, detection_result, created_at, patient_email 
+           FROM reports 
+           WHERE user_id = ? 
+           ORDER BY created_at DESC""",
         (session['user_id'],)
     ).fetchall()
     conn.close()
