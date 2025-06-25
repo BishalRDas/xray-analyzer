@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Government Dental College, Dibrugarh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 text-gray-800">
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-blue-600">Govt Dental College, Dibrugarh</h1>
+        <ul class="hidden md:flex space-x-6">
+          <li><a href="#" class="hover:text-blue-500">Home</a></li>
+          <li><a href="/login" class="hover:text-blue-500">Log In</a></li>
+          <li><a href="/register" class="hover:text-blue-500">Register</a></li>
+        </ul>
+        <button class="md:hidden text-2xl" id="menu-toggle">☰</button>
+      </div>
+      <ul class="md:hidden px-4 pb-4 hidden flex-col space-y-2" id="mobile-menu">
+        <li><a href="#" class="block hover:text-blue-500">Home</a></li>
+        <li><a href="/login" class="block hover:text-blue-500">Log In</a></li>
+        <li><a href="/register" class="block hover:text-blue-500">Register</a></li>
+      </ul>
+    </nav>
+
+    <!-- ✅ Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="max-w-3xl mx-auto mt-6">
+          {% for category, message in messages %}
+            <div class="mb-4 px-4 py-3 rounded text-white {{ 
+                'bg-green-500' if category == 'success' else 
+                'bg-red-500' if category == 'danger' else 
+                'bg-yellow-500' if category == 'warning' else 
+                'bg-blue-500' 
+            }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Hero Section -->
+    <section class="relative bg-cover bg-center bg-no-repeat text-center text-white py-32" style="background-image: url('/static/background3.jpg');">
+      <div class="absolute inset-0 bg-blue-900 bg-opacity-60"></div>
+      <div class="relative z-10 px-4">
+        <h2 class="text-4xl font-bold mb-4">Welcome to Government Dental College, Dibrugarh</h2>
+        <p class="mb-6 max-w-2xl mx-auto">
+          Committed to excellence in dental education, patient care, and research in the heart of Assam.
+        </p>
+        <a href="#" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Explore More</a>
+      </div>
+    </section>
+
+    <!-- Report Request Form -->
+    <section class="max-w-3xl mx-auto bg-white shadow-md rounded-lg px-8 py-10 mt-12 mb-16">
+      <h3 class="text-xl font-semibold text-blue-700 mb-6 text-center">📄 Request Your Dental Report</h3>
+      <form action="/send_report" method="POST" class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <div>
+          <label for="application_number" class="block text-sm font-medium text-gray-700 mb-1">Application Number</label>
+          <input type="text" name="application_number" id="application_number" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+          <input type="email" name="email" id="email" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="sm:col-span-2 text-center">
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded">
+            Send Report
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Features Section -->
+    <section class="max-w-6xl mx-auto px-4 py-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="bg-white shadow p-6 rounded">
+        <h3 class="text-xl font-semibold mb-2 text-blue-700">Experienced Faculty</h3>
+        <p>Our institution is backed by skilled professionals and educators with decades of experience.</p>
+      </div>
+      <div class="bg-white shadow p-6 rounded">
+        <h3 class="text-xl font-semibold mb-2 text-blue-700">Modern Facilities</h3>
+        <p>Equipped with state-of-the-art laboratories and clinical equipment for comprehensive training.</p>
+      </div>
+      <div class="bg-white shadow p-6 rounded">
+        <h3 class="text-xl font-semibold mb-2 text-blue-700">Community Service</h3>
+        <p>Active participation in oral health camps and outreach programs across Assam.</p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-white text-center py-6 shadow-inner">
+      <p>&copy; 2025 Government Dental College, Dibrugarh. All rights reserved.</p>
+    </footer>
+
+    <!-- Toggle mobile nav -->
+    <script>
+      document.getElementById('menu-toggle').addEventListener('click', function () {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+Flask
+Flask-WTF
+WTForms
+email-validator
+flask-mail
+bcrypt
+Pillow
+requests
+opencv-python-headless

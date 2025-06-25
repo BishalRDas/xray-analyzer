@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}My Reports{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+  @media (max-width: 768px) {
+    body {
+      font-size: 0.875rem;
+    }
+    .table img {
+      width: 100%;
+      height: auto;
+    }
+    .btn-download {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+    }
+  }
+</style>
+
+<div class="container my-4">
+  <h1 class="mb-3">🧾 Past Analysis Reports</h1>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-primary mb-4">⬅ Back to Dashboard</a>
+
+  {% if reports %}
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Application No.</th>
+          <th>Image</th>
+          <th>Detections</th>
+          <th>Date & Time</th>
+          <th>Download</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+        <tr id="report-{{ report['id'] }}">
+          <td><strong>{{ report['application_number'] }}</strong></td>
+          <td>
+            <img src="/{{ report['image_path'] }}" alt="Report Image" class="img-fluid rounded mb-2" width="200">
+            <img id="img-{{ report['id'] }}"
+                 src="/{{ report['image_path'] }}"
+                 data-path="/{{ report['image_path'] }}"
+                 style="display: none;" />
+          </td>
+          <td>
+            <div id="text-{{ report['id'] }}">
+              {% if report.parsed_detections %}
+              <ul class="mb-0 ps-3">
+                {% for item in report.parsed_detections %}
+                <li><strong>{{ item.label }}</strong> — Confidence: {{ item.confidence }}%</li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <em>No findings detected.</em>
+              {% endif %}
+            </div>
+          </td>
+          <td>{{ report['created_at'] }}</td>
+          <td>
+            <button onclick="downloadPDF({{ report['id'] }})" class="btn btn-sm btn-success btn-download">
+              Download PDF
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p>No reports found.</p>
+  {% endif %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+  async function downloadPDF(id) {
+    const imgEl = document.getElementById(`img-${id}`);
+    const imgUrl = imgEl.getAttribute('data-path');
+    const textEl = document.getElementById(`text-${id}`);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+
+    const image = new Image();
+    image.crossOrigin = "anonymous";
+    image.src = imgUrl;
+
+    image.onload = function () {
+      const ratio = image.width / image.height;
+      const imgW = pdfWidth;
+      const imgH = imgW / ratio;
+
+      pdf.addImage(image, 'JPEG', 0, 0, imgW, imgH);
+
+      const textY = imgH + 10;
+      const text = textEl.innerText;
+      const splitText = pdf.splitTextToSize(text, pdfWidth - 20);
+      pdf.text(splitText, 10, textY);
+
+      pdf.save(`report-${id}.pdf`);
+    };
+  }
+</script>
+{% endblock %}
