@@ -7,3 +7,4 @@ bcrypt
 Pillow
 requests
 opencv-python-headless
+gunicorn
